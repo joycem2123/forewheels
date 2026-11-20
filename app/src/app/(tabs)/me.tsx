@@ -4,8 +4,8 @@ import type { ReactNode } from 'react';
 import { Pressable, Switch, View } from 'react-native';
 
 import { AccountNeeded } from '@/components/account-needed';
-import { Row, Screen, Section, Segmented, T, Title, shadow } from '@/components/ui';
-import { pushProfile } from '@/sync/account-data';
+import { Button, Row, Screen, Section, Segmented, T, Title, shadow } from '@/components/ui';
+import { pushProfile, signOutToWelcome } from '@/sync/account-data';
 import { useSignedIn, useStore } from '@/store/store';
 import { useColors } from '@/theme';
 
@@ -94,6 +94,11 @@ export default function Me() {
         <Item><T>Cancellations</T><T muted size={13}>Free up to 2 hrs before tee time</T></Item>
         <Item last><T>Questions</T><T muted size={13}>Ask at the pro shop</T></Item>
       </Group>
+      {signedIn ? (
+        <Button title="Sign out" kind="ghost" onPress={() => void signOutToWelcome().then(() => router.replace('/welcome'))} />
+      ) : (
+        <Button title="Sign in or create account" onPress={() => void signOutToWelcome().then(() => router.replace('/welcome'))} />
+      )}
       <Row style={{ justifyContent: 'center' }}><T size={12} muted>Fore Wheels Detailing · version 1.0.0</T></Row>
     </Screen>
   );
