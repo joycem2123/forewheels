@@ -49,17 +49,24 @@ Edit `engine/src/catalog.ts`. Both apps pick up the change.
 | `src/lib/payments.ts` | Stand-in payment processor |
 | `src/theme.ts` | Colours (light by default, dark when the phone is dark) and Instrument Sans |
 
-### Release to TestFlight and the App Store (EAS)
+### Release to TestFlight (EAS)
+
+Everything is set up, so a new TestFlight build is one command from `app/`:
 
 ```bash
-cd app
-npx eas-cli@latest login
-npx eas-cli@latest init                                 # links the app to an Expo project
-npx eas-cli@latest build --platform ios --profile testflight
-npx eas-cli@latest submit --platform ios                # sends the build to App Store Connect
+npx eas-cli@latest build --platform ios --profile testflight --auto-submit
 ```
 
-Bundle ID: `com.forewheelsdetailing.app`. Apple team: the same one as Clutch Up.
+The build number goes up automatically. Apple processes the upload in 5–30 minutes, then it appears in TestFlight.
+
+| Setting | Value |
+|---|---|
+| Expo project | `@joycem2123/forewheels` |
+| Bundle ID | `com.forewheelsdetailing.app` |
+| App Store Connect app ID | `6837474613` (in `eas.json`) |
+| Apple team | `NVKSSW8ZV6` (Individual), shared with Clutch Up |
+| Signing | Shared team distribution certificate plus a Fore Wheels provisioning profile, both stored on Expo |
+| Uploads | Use the App Store Connect API key stored on Expo ("Clutch Up EAS Admin") |
 
 ## Before launch (not built yet)
 
