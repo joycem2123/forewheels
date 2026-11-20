@@ -81,16 +81,28 @@ export const useStore = create<State>()(
           const next = advance(d);
           if (next !== d) commit(next);
         },
+        // Signed-in members book, cancel and change pass on the server (so staff see it);
+        // the phone-only path remains for offline demos and tests.
         async book(input) {
           const problem = checkBooking(input);
           if (problem) throw new Error(problem);
           const q = quoteFor(get().data, input);
           const ref = q.total > 0 ? (await charge(q.total, input.paymentMethod)).ref : null;
+          if (get().accountKey !== GUEST_KEY) {
+            const { bookOnline } = await import('@/sync/bookings');
+            return await bookOnline(input, q, ref);
+          }
           const r = addBooking(get().data, input, ref);
           commit(r.data);
           return r.booking;
         },
         async cancel(id) {
+          if (get().accountKey !== GUEST_KEY) {
+            const { cancelOnline } = await import('@/sync/bookings');
+            const r = await cancelOnline(id);
+            await refund(r.paymentRef, r.refund);
+            return r.message;
+          }
           const r = cancelBooking(get().data, id);
           await refund(r.paymentRef, r.refund);
           commit(r.data);
@@ -100,6 +112,10 @@ export const useStore = create<State>()(
           const d = get().data;
           const price = PLANS[plan].price[d.member.vehicle.size];
           if (price > 0) await charge(price, d.member.defaultPayment);
+          if (get().accountKey !== GUEST_KEY) {
+            const { setPlanOnline } = await import('@/sync/bookings');
+            return await setPlanOnline(plan);
+          }
           commit(switchPlan(get().data, plan));
         },
         updateMember: (patch) => commit({ ...get().data, member: { ...get().data.member, ...patch } }),

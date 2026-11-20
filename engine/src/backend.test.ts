@@ -39,3 +39,17 @@ describe('booking flow', () => {
     expect(d.member.credits.express).toEqual({ used: 0, of: 20 });
   });
 });
+
+describe('gifted washes', () => {
+  it('are used after pass credits run out, and come back on a free cancellation', () => {
+    const d0 = seed(NOW);
+    // Monthly pass: Signature credit already used in the sample, so a gift is used instead.
+    const d = { ...d0, member: { ...d0.member, gifts: { signature: 1 } } };
+    const r = addBooking(d, { tier: 'signature', size: 'suv', teeTime: new Date('2026-06-07T09:00:00').toISOString(), stall: '', keys: 'proshop', addons: [], paymentMethod: 'club' }, null, NOW);
+    expect(r.booking.paid).toBe(0);
+    expect(r.booking.creditSource).toBe('gift');
+    expect(r.data.member.gifts?.signature).toBe(0);
+    const c = cancelBooking(r.data, r.booking.id, NOW);
+    expect(c.data.member.gifts?.signature).toBe(1);
+  });
+});

@@ -75,7 +75,7 @@ export function paymentMethods(m: Member): PaymentMethod[] {
 }
 
 export function quoteFor(d: AppData, input: Pick<NewBooking, 'tier' | 'size' | 'addons'>): Quote {
-  return quote({ ...input, plan: d.member.plan, credits: d.member.credits });
+  return quote({ ...input, plan: d.member.plan, credits: d.member.credits, gifts: d.member.gifts });
 }
 
 /** Checks a booking before payment. Returns an error message, or null when it's fine. */
@@ -88,11 +88,12 @@ export function checkBooking(input: NewBooking, now = Date.now()): string | null
 export function addBooking(d: AppData, input: NewBooking, paymentRef: string | null, now = Date.now()): { data: AppData; booking: Booking } {
   const next = clone(d);
   const q = quoteFor(next, input);
-  if (q.usesCredit) next.member.credits[input.tier]!.used += 1;
+  if (q.creditSource === 'plan') next.member.credits[input.tier]!.used += 1;
+  if (q.creditSource === 'gift') next.member.gifts = { ...next.member.gifts, [input.tier]: (next.member.gifts?.[input.tier] ?? 1) - 1 };
   const booking: Booking = {
     id: 'b-' + now.toString(36) + Math.floor(Math.random() * 1000),
     tier: input.tier, size: input.size, teeTime: input.teeTime, stall: input.stall.trim().toUpperCase(),
-    keys: input.keys, addons: input.addons, status: 'booked', paid: q.total, usedCredit: q.usesCredit,
+    keys: input.keys, addons: input.addons, status: 'booked', paid: q.total, usedCredit: q.usesCredit, creditSource: q.creditSource,
     paymentMethod: q.total > 0 ? input.paymentMethod : null, paymentRef, createdAt: new Date(now).toISOString(),
   };
   next.bookings.push(booking);
@@ -107,8 +108,12 @@ export function cancelBooking(d: AppData, id: string, now = Date.now()): { data:
   const terms = cancelTerms(b, new Date(now));
   if (terms.kind === 'closed') throw new Error('This booking can no longer be cancelled.');
   if (terms.kind === 'free' && terms.returnsCredit) {
-    const c = next.member.credits[b.tier];
-    if (c) c.used = Math.max(0, c.used - 1);
+    if (b.creditSource === 'gift') {
+      next.member.gifts = { ...next.member.gifts, [b.tier]: (next.member.gifts?.[b.tier] ?? 0) + 1 };
+    } else {
+      const c = next.member.credits[b.tier];
+      if (c) c.used = Math.max(0, c.used - 1);
+    }
   }
   b.status = 'cancelled';
   b.refund = terms.refund;

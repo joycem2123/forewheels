@@ -6,6 +6,7 @@ import { Pressable, Switch, View } from 'react-native';
 import { AccountNeeded } from '@/components/account-needed';
 import { Button, Row, Screen, Section, Segmented, T, Title, shadow } from '@/components/ui';
 import { pushProfile, signOutToWelcome } from '@/sync/account-data';
+import { useIsStaff } from '@/sync/staff';
 import { useSignedIn, useStore } from '@/store/store';
 import { useColors } from '@/theme';
 
@@ -25,6 +26,7 @@ export default function Me() {
   const m = useStore((s) => s.data.member);
   const update = useStore((s) => s.updateMember);
   const signedIn = useSignedIn();
+  const isStaff = useIsStaff();
   const payLabel: Record<PaymentMethod, string> = { club: 'Club member account', apple: 'Apple Pay', card: m.card ? `${m.card.brand} •••• ${m.card.last4}` : 'Card' };
   const methods = paymentMethods(m);
   const notifyRows: [keyof Member['notify'], string][] = [['started', 'Work starts on my car'], ['ready', 'My car is ready'], ['reminders', 'I have a tee time with no booking']];
@@ -38,6 +40,18 @@ export default function Me() {
       </View>
 
       {!signedIn && <AccountNeeded what="book and save your details" />}
+
+      {signedIn && isStaff && (
+        <Pressable accessibilityRole="button" onPress={() => router.push('/staff')}
+          style={({ pressed }) => ({ backgroundColor: c.dark, borderRadius: 24, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, opacity: pressed ? 0.85 : 1 })}>
+          <View style={{ flex: 1 }}>
+            <T size={12} weight="bold" color={c.darkMuted} style={{ letterSpacing: 1 }}>STAFF</T>
+            <T size={18} weight="bold" color="#FFFFFF">Today’s bay</T>
+            <T size={13} color={c.darkMuted}>Check cars in, update progress, refunds and gifts</T>
+          </View>
+          <T size={24} color="#FFFFFF">›</T>
+        </Pressable>
+      )}
 
       {signedIn && (
         <>

@@ -78,6 +78,15 @@ export default function Bookings() {
               </View>
             </View>
             {live && <Bubbles pct={p.pct} small />}
+            {(() => {
+              const note = [...(b.updates ?? [])].reverse().find((u) => u.byStaff);
+              return note ? (
+                <View style={{ backgroundColor: c.accentSoft, borderRadius: 14, padding: 10 }}>
+                  <T size={13}>{note.message}</T>
+                  <T size={11} muted style={{ marginTop: 2 }}>From the Fore Wheels team · {clock(new Date(note.at))}</T>
+                </View>
+              ) : null;
+            })()}
             {live && <T size={12} muted>Work has started, so this booking can’t be cancelled.</T>}
             {b.status === 'booked' && (confirming === b.id ? (
               <View style={{ backgroundColor: c.dangerSoft, borderRadius: 16, padding: 12, gap: 10 }}>
@@ -108,8 +117,9 @@ export default function Bookings() {
                 <T size={13} muted>
                   {medDate(new Date(b.teeTime))} · {b.status === 'cancelled'
                     ? (b.refund ? `cancelled, ${money(b.refund)} refunded` : 'cancelled')
-                    : b.usedCredit ? 'pass credit' : b.paymentMethod === 'club' ? 'club account' : b.paymentMethod === 'apple' ? 'Apple Pay' : 'card'}
+                    : b.usedCredit ? (b.creditSource === 'gift' ? 'gifted wash' : 'pass credit') : b.paymentMethod === 'club' ? 'club account' : b.paymentMethod === 'apple' ? 'Apple Pay' : 'card'}
                 </T>
+                {b.status !== 'cancelled' && b.refund ? <T size={13} color={c.ok}>{money(b.refund)} refunded{b.refundReason ? ` · ${b.refundReason}` : ''}</T> : null}
               </View>
               <T weight="bold">{money(b.status === 'cancelled' ? Math.max(0, b.paid - (b.refund ?? 0)) : b.paid)}</T>
             </Row>

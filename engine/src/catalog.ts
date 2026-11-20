@@ -63,6 +63,9 @@ export const ADDONS: Addon[] = [
 
 export type Credits = Partial<Record<TierId, { used: number; of: number }>>;
 
+/** Free washes gifted by staff, by service (count left). Used after pass credits. */
+export type Gifts = Partial<Record<TierId, number>>;
+
 export interface Plan {
   id: PlanId;
   name: string;

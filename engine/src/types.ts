@@ -1,4 +1,4 @@
-import type { AddonId, Credits, PlanId, TierId, VehicleSize } from './catalog';
+import type { AddonId, Credits, Gifts, PlanId, TierId, VehicleSize } from './catalog';
 
 export type BookingStatus = 'booked' | 'in_progress' | 'ready' | 'completed' | 'cancelled';
 export type PaymentMethod = 'club' | 'apple' | 'card';
@@ -16,11 +16,33 @@ export interface Booking {
   status: BookingStatus;
   paid: number;
   usedCredit: boolean;
+  /** Where a free wash came from (pass credit or staff gift). */
+  creditSource?: 'plan' | 'gift' | null;
   paymentMethod: PaymentMethod | null;
   paymentRef: string | null;
   checkedInAt?: string;
+  readyAt?: string;
   refund?: number;
+  refundReason?: string;
+  /** Set by staff while the car is being detailed: the current step and how far along (0–1). */
+  stage?: string | null;
+  progress?: number | null;
+  /** Member's name and car, as staff see them. */
+  memberName?: string | null;
+  vehicleLabel?: string | null;
+  /** Newest last: what staff did or said about this booking. */
+  updates?: BookingUpdate[];
   createdAt: string;
+}
+
+export type UpdateKind = 'booked' | 'checked_in' | 'stage' | 'ready' | 'completed' | 'cancelled' | 'refund' | 'gift' | 'message';
+
+export interface BookingUpdate {
+  id: string;
+  at: string;
+  kind: UpdateKind;
+  message: string;
+  byStaff: boolean;
 }
 
 export interface Member {
@@ -33,6 +55,8 @@ export interface Member {
   plan: PlanId;
   planRenews: string;
   credits: Credits;
+  /** Free washes gifted by staff. */
+  gifts?: Gifts;
   defaultPayment: PaymentMethod;
   /** A saved card, or null when none has been added yet. */
   card: { brand: string; last4: string; exp: string } | null;

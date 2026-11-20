@@ -1,5 +1,5 @@
 import {
-  ADDONS, AddonId, Credits, FREE_CANCEL_HOURS, GST_RATE, LATE_CANCEL_FEE,
+  ADDONS, AddonId, Credits, FREE_CANCEL_HOURS, Gifts, GST_RATE, LATE_CANCEL_FEE,
   PLANS, PlanId, TIERS, TierId, VehicleSize,
 } from './catalog';
 
@@ -9,6 +9,8 @@ export interface QuoteInput {
   addons: AddonId[];
   plan: PlanId;
   credits: Credits;
+  /** Free washes gifted by staff. */
+  gifts?: Gifts;
 }
 
 export interface QuoteLine { label: string; amount: number; note?: string }
@@ -16,6 +18,8 @@ export interface QuoteLine { label: string; amount: number; note?: string }
 export interface Quote {
   lines: QuoteLine[];
   usesCredit: boolean;
+  /** Where the free wash comes from: the pass, or a staff gift. */
+  creditSource: 'plan' | 'gift' | null;
   subtotal: number;
   gst: number;
   total: number;
@@ -33,14 +37,15 @@ export function addonAllowed(id: AddonId, tier: TierId): boolean {
   return !!a && (!a.onlyFor || a.onlyFor.includes(tier));
 }
 
-export function quote({ tier, size, addons, plan, credits }: QuoteInput): Quote {
+export function quote({ tier, size, addons, plan, credits, gifts }: QuoteInput): Quote {
   const p = PLANS[plan];
   const t = TIERS[tier];
   const lines: QuoteLine[] = [];
-  const usesCredit = plan !== 'payg' && hasCredit(credits, tier);
+  const creditSource = plan !== 'payg' && hasCredit(credits, tier) ? 'plan' : (gifts?.[tier] ?? 0) > 0 ? 'gift' : null;
+  const usesCredit = creditSource !== null;
 
   if (usesCredit) {
-    lines.push({ label: t.name, amount: 0, note: `${p.name} credit` });
+    lines.push({ label: t.name, amount: 0, note: creditSource === 'gift' ? 'gifted wash' : `${p.name} credit` });
   } else {
     const disc = p.discountTiers.includes(tier) ? p.discount : 0;
     lines.push({
@@ -58,7 +63,7 @@ export function quote({ tier, size, addons, plan, credits }: QuoteInput): Quote 
 
   const subtotal = round2(lines.reduce((s, l) => s + l.amount, 0));
   const gst = round2(subtotal * GST_RATE);
-  return { lines, usesCredit, subtotal, gst, total: round2(subtotal + gst) };
+  return { lines, usesCredit, creditSource, subtotal, gst, total: round2(subtotal + gst) };
 }
 
 export type CancelTerms =
