@@ -25,7 +25,7 @@ export default function Home() {
 
       <View>
         <T size={27} weight="semibold" style={{ letterSpacing: -0.5, lineHeight: 32 }}>
-          Hey {member.firstName}, {live ? 'enjoy the round.' : 'ready for your next round?'}
+          Hey {member.firstName || 'there'}, {live ? 'enjoy the round.' : 'ready for your next round?'}
         </T>
         <T size={27} weight="semibold" color={c.accent} style={{ letterSpacing: -0.5, lineHeight: 32 }}>
           {live ? "We've got the car." : "We'll handle the car."}

@@ -42,6 +42,9 @@ export default function RootLayout() {
             contentStyle: { backgroundColor: c.bg },
           }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="welcome" options={{ headerShown: false, gestureEnabled: false, animation: 'fade' }} />
+          <Stack.Screen name="auth-callback" options={{ headerShown: false }} />
+          <Stack.Screen name="account" options={{ title: 'Account settings', headerBackTitle: 'Me' }} />
           <Stack.Screen
             name="checkout"
             options={{ title: 'Review & pay', presentation: 'formSheet', sheetAllowedDetents: [0.92], sheetGrabberVisible: true, sheetCornerRadius: 30, headerShown: false }}

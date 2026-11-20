@@ -4,6 +4,7 @@ import {
   atSlot,
   dayShort,
   hasCredit,
+  paymentMethods,
   money,
   PLANS,
   quoteFor,
@@ -23,7 +24,7 @@ import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Screen, Section, Segmented, T, TierMark, Title, shadow } from '@/components/ui';
 import { useNow } from '@/lib/use-now';
-import { useStore } from '@/store/store';
+import { useSignedIn, useStore } from '@/store/store';
 import { fonts, useColors } from '@/theme';
 
 export default function Book() {
@@ -31,6 +32,8 @@ export default function Book() {
   const now = useNow();
   const data = useStore((s) => s.data);
   const setDraft = useStore((s) => s.setDraft);
+  const setOnboarded = useStore((s) => s.setOnboarded);
+  const signedIn = useSignedIn();
   const member = data.member;
   const plan = PLANS[member.plan];
 
@@ -56,8 +59,15 @@ export default function Book() {
   const q = quoteFor(data, { tier, size, addons: cleanAddons });
 
   const review = () => {
+    // Guests need an account to book.
+    if (!signedIn) {
+      setOnboarded(false);
+      return router.replace('/welcome');
+    }
     if (!chosen) return;
-    setDraft({ tier, size, teeTime: atSlot(day, chosen).toISOString(), stall, keys, addons: cleanAddons, paymentMethod: member.defaultPayment });
+    const methods = paymentMethods(member);
+    const paymentMethod = methods.includes(member.defaultPayment) ? member.defaultPayment : methods[0];
+    setDraft({ tier, size, teeTime: atSlot(day, chosen).toISOString(), stall, keys, addons: cleanAddons, paymentMethod });
     router.push('/checkout');
   };
 
@@ -170,9 +180,9 @@ export default function Book() {
           <T size={12} color={c.darkMuted}>{q.usesCredit && q.total === 0 ? 'Pass credit' : 'Total incl. GST'}</T>
           <T size={20} weight="bold" color="#FFFFFF">{money(q.total)}</T>
         </View>
-        <Pressable accessibilityRole="button" disabled={!chosen} onPress={review}
-          style={({ pressed }) => ({ backgroundColor: '#FFFFFF', borderRadius: 14, paddingVertical: 12, paddingHorizontal: 18, opacity: !chosen ? 0.5 : pressed ? 0.85 : 1 })}>
-          <T weight="bold" color="#1F1A3A">{chosen ? 'Review' : 'Pick a time'}</T>
+        <Pressable accessibilityRole="button" disabled={signedIn && !chosen} onPress={review}
+          style={({ pressed }) => ({ backgroundColor: '#FFFFFF', borderRadius: 14, paddingVertical: 12, paddingHorizontal: 18, opacity: signedIn && !chosen ? 0.5 : pressed ? 0.85 : 1 })}>
+          <T weight="bold" color="#1F1A3A">{!signedIn ? 'Sign in to book' : chosen ? 'Review' : 'Pick a time'}</T>
         </Pressable>
       </View>
     </View>

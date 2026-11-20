@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { View } from 'react-native';
 
 import { Button, CornerBubbles, Pill, Row, Screen, Segmented, T, Title, shadow } from '@/components/ui';
-import { useStore } from '@/store/store';
+import { AccountNeeded } from '@/components/account-needed';
+import { useSignedIn, useStore } from '@/store/store';
 import { BRAND, useColors } from '@/theme';
 
 export default function Passes() {
@@ -14,6 +15,7 @@ export default function Passes() {
   const [size, setSize] = useState<VehicleSize>(member.vehicle.size);
   const [confirm, setConfirm] = useState<PlanId | null>(null);
   const [busy, setBusy] = useState(false);
+  const signedIn = useSignedIn();
 
   async function doSwitch(id: PlanId) {
     setBusy(true);
@@ -29,6 +31,7 @@ export default function Passes() {
   return (
     <Screen>
       <Title>Passes</Title>
+      {!signedIn && <AccountNeeded what="get a pass" />}
       <Segmented label="Vehicle size" value={size} onChange={setSize} options={[['car', 'Car'], ['suv', 'SUV / Truck']]} />
 
       {PLAN_ORDER.map((id) => {
@@ -61,7 +64,7 @@ export default function Passes() {
                 </View>
               ))}
             </View>
-            {!cur && (confirm === id ? (
+            {signedIn && !cur && (confirm === id ? (
               <View style={{ backgroundColor: season ? 'rgba(255,255,255,0.95)' : c.accentSoft, borderRadius: 16, padding: 12, gap: 10, marginTop: 4 }}>
                 <T size={13.5} color="#1F1A3A" style={!season && { color: c.text }}>
                   {id === 'payg'

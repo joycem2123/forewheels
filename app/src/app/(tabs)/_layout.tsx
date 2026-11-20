@@ -1,9 +1,12 @@
+import { Redirect } from 'expo-router';
 import { Tabs, type BottomTabBarProps } from 'expo-router/js-tabs';
+import { useEffect, useState } from 'react';
 import type { SymbolViewProps } from 'expo-symbols';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Sym, T } from '@/components/ui';
+import { useStore } from '@/store/store';
 import { useColors } from '@/theme';
 
 const ICONS: Record<string, [string, SymbolViewProps['name'], string]> = {
@@ -50,6 +53,12 @@ function TabBar({ state, navigateToTab, insets: barInsets }: BottomTabBarProps) 
 }
 
 export default function TabsLayout() {
+  const onboarded = useStore((s) => s.onboarded);
+  // Wait until saved data has loaded before deciding whether to show the welcome screen.
+  const [hydrated, setHydrated] = useState(useStore.persist.hasHydrated());
+  useEffect(() => useStore.persist.onFinishHydration(() => setHydrated(true)), []);
+  if (!hydrated) return null;
+  if (!onboarded) return <Redirect href="/welcome" />;
   return (
     <Tabs tabBar={(props) => <TabBar {...props} />} screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="index" options={{ title: 'Home' }} />

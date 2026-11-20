@@ -86,7 +86,7 @@ export default function Checkout({ open, onClose, booking, quote, onDone }: {
           {([
             ['club', 'Club member account', `Member #${member.memberNo} · added to your club bill`],
             ['apple', 'Apple Pay', ''],
-            ['card', `${member.card.brand} •••• ${member.card.last4}`, `Expires ${member.card.exp}`],
+            ...(member.card ? [['card', `${member.card.brand} •••• ${member.card.last4}`, `Expires ${member.card.exp}`]] : []),
           ] as [PaymentMethod, string, string][]).map(([k, l, s]) => (
             <label key={k}>
               <input type="radio" name="pay" id={'pay-' + k} checked={method === k} onChange={() => setMethod(k)} />

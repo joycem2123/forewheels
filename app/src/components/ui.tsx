@@ -1,4 +1,5 @@
 import type { TierId } from '@forewheels/engine';
+import { Image } from 'expo-image';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { useEffect, useState, type ReactNode } from 'react';
 import {
@@ -199,15 +200,13 @@ export function TierMark({ tier }: { tier: TierId }) {
   );
 }
 
+const MARK_VIOLET = require('../../assets/images/mark-violet.png');
+
+/** Small logo for screen headers: the Ball-wheel mark and the name. */
 export function Logo() {
-  const c = useColors();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }} accessibilityLabel="Fore Wheels">
-      <View style={{ width: 28, height: 24 }}>
-        <View style={{ position: 'absolute', left: 0, bottom: 0, width: 16, height: 16, borderRadius: 8, backgroundColor: c.accent }} />
-        <View style={{ position: 'absolute', left: 14, top: 0, width: 11, height: 11, borderRadius: 6, backgroundColor: c.accent, opacity: 0.6 }} />
-        <View style={{ position: 'absolute', right: 0, bottom: 2, width: 7, height: 7, borderRadius: 4, backgroundColor: c.accent, opacity: 0.35 }} />
-      </View>
+      <Image source={MARK_VIOLET} style={{ width: 28, height: 28 }} contentFit="contain" />
       <T size={17} weight="bold">Fore Wheels</T>
     </View>
   );

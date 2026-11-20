@@ -25,15 +25,27 @@ export interface Booking {
 
 export interface Member {
   firstName: string;
+  lastName?: string;
   club: string;
+  /** Club member number; empty when not set (then "charge to club account" isn't offered). */
   memberNo: string;
   vehicle: { label: string; plate: string; size: VehicleSize };
   plan: PlanId;
   planRenews: string;
   credits: Credits;
   defaultPayment: PaymentMethod;
-  card: { brand: string; last4: string; exp: string };
+  /** A saved card, or null when none has been added yet. */
+  card: { brand: string; last4: string; exp: string } | null;
   notify: { started: boolean; ready: boolean; reminders: boolean };
+}
+
+/** Details collected when someone creates an account. */
+export interface NewMemberDetails {
+  firstName: string;
+  lastName?: string;
+  club?: string;
+  memberNo?: string;
+  vehicle?: { label: string; plate: string; size: VehicleSize };
 }
 
 export interface AppData {

@@ -8,7 +8,7 @@ export default function Me() {
   const { data, updateMember, reset, go } = useStore();
   const m = data!.member;
   const set = (patch: Partial<Member>) => updateMember(patch);
-  const payLabel: Record<PaymentMethod, string> = { club: 'Club member account', apple: 'Apple Pay', card: `${m.card.brand} •••• ${m.card.last4}` };
+  const payLabel: Record<PaymentMethod, string> = { club: 'Club member account', apple: 'Apple Pay', card: m.card ? `${m.card.brand} •••• ${m.card.last4}` : 'Card' };
 
   return (
     <main className="screen">

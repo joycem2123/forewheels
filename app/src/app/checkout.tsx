@@ -1,4 +1,4 @@
-import { clock, FREE_CANCEL_HOURS, medDate, money, quoteFor, relDay, TIERS, type Booking, type PaymentMethod } from '@forewheels/engine';
+import { clock, FREE_CANCEL_HOURS, medDate, money, paymentMethods, quoteFor, relDay, TIERS, type Booking, type PaymentMethod } from '@forewheels/engine';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
@@ -15,7 +15,7 @@ export default function Checkout() {
   const data = useStore((s) => s.data);
   const book = useStore((s) => s.book);
   const notify = useStore((s) => s.notify);
-  const [method, setMethod] = useState<PaymentMethod>(draft?.paymentMethod ?? 'club');
+  const [method, setMethod] = useState<PaymentMethod>(draft?.paymentMethod ?? 'apple');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<Booking | null>(null);
@@ -74,11 +74,12 @@ export default function Checkout() {
     );
   }
 
-  const methods: [PaymentMethod, string, string][] = [
-    ['club', 'Club member account', `Member #${member.memberNo} · added to your club bill`],
-    ['apple', 'Apple Pay', ''],
-    ['card', `${member.card.brand} •••• ${member.card.last4}`, `Expires ${member.card.exp}`],
-  ];
+  const labels: Record<PaymentMethod, [string, string]> = {
+    club: ['Club member account', `Member #${member.memberNo} · added to your club bill`],
+    apple: ['Apple Pay', ''],
+    card: member.card ? [`${member.card.brand} •••• ${member.card.last4}`, `Expires ${member.card.exp}`] : ['Card', ''],
+  };
+  const methods: [PaymentMethod, string, string][] = paymentMethods(member).map((k) => [k, ...labels[k]]);
 
   return (
     <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={wrap}>

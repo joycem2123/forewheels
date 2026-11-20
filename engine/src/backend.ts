@@ -4,7 +4,7 @@
 
 import { PLANS, TIERS, type PlanId } from './catalog';
 import { cancelTerms, quote, type Quote } from './pricing';
-import type { AppData, Booking, NewBooking } from './types';
+import type { AppData, Booking, Member, NewBooking, NewMemberDetails, PaymentMethod } from './types';
 
 const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
 
@@ -44,6 +44,34 @@ export function seed(now = Date.now()): AppData {
       { id: 'b-0981', tier: 'express', size: 'suv', teeTime: at(now, -19, '07:40'), stall: 'C-08', keys: 'unlocked', addons: [], status: 'completed', paid: 0, usedCredit: true, paymentMethod: null, paymentRef: null, createdAt: at(now, -20, '12:00') },
     ],
   };
+}
+
+/** A brand-new member: pay as you go, no bookings, no saved card. Guests use this with an empty name. */
+export function newMember(details: NewMemberDetails = { firstName: '' }, now = Date.now()): AppData {
+  const renews = new Date(now);
+  renews.setMonth(renews.getMonth() + 1, 1);
+  const memberNo = details.memberNo?.trim() ?? '';
+  return {
+    member: {
+      firstName: details.firstName.trim(),
+      lastName: details.lastName?.trim() || undefined,
+      club: details.club?.trim() ?? '',
+      memberNo,
+      vehicle: details.vehicle ?? { label: '', plate: '', size: 'car' },
+      plan: 'payg',
+      planRenews: renews.toISOString(),
+      credits: {},
+      defaultPayment: memberNo ? 'club' : 'apple',
+      card: null,
+      notify: { started: true, ready: true, reminders: false },
+    },
+    bookings: [],
+  };
+}
+
+/** Payment methods this member can use, in display order. */
+export function paymentMethods(m: Member): PaymentMethod[] {
+  return [...(m.memberNo ? (['club'] as const) : []), 'apple', ...(m.card ? (['card'] as const) : [])];
 }
 
 export function quoteFor(d: AppData, input: Pick<NewBooking, 'tier' | 'size' | 'addons'>): Quote {
