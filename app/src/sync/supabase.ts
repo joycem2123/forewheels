@@ -5,8 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
 /** Public project settings: these are meant to ship inside the app (access is controlled by the database rules). */
-export const SUPABASE_URL = 'https://PROJECT_REF.supabase.co';
-export const SUPABASE_KEY = 'PUBLISHABLE_KEY';
+export const SUPABASE_URL = 'https://ugkdzuanjmbqenbzrelg.supabase.co';
+export const SUPABASE_KEY = 'sb_publishable_4eAhBW66Iv3Mu0TT-gCUSQ_jhZrIQqF';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {

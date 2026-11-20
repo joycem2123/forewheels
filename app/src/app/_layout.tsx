@@ -5,11 +5,10 @@ import {
   InstrumentSans_700Bold,
   useFonts,
 } from '@expo-google-fonts/instrument-sans';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { Toast } from '@/components/ui';
@@ -19,7 +18,6 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const c = useColors();
-  const scheme = useColorScheme();
   const [loaded, error] = useFonts({ InstrumentSans_400Regular, InstrumentSans_500Medium, InstrumentSans_600SemiBold, InstrumentSans_700Bold });
   const ready = loaded || !!error;
 
@@ -28,11 +26,11 @@ export default function RootLayout() {
   }, [ready]);
   if (!ready) return null;
 
-  const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
+  const base = DefaultTheme;
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={{ ...base, colors: { ...base.colors, background: c.bg, card: c.card, primary: c.accent, text: c.text, border: c.border } }}>
-        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+        <StatusBar style="dark" />
         <Stack
           screenOptions={{
             headerShadowVisible: false,

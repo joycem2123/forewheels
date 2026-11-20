@@ -1,6 +1,7 @@
 import { emailOk, looksLikeEmail, newMember, passwordOk, type VehicleSize } from '@forewheels/engine';
 import { AppleAuthenticationButton, AppleAuthenticationButtonStyle, AppleAuthenticationButtonType } from 'expo-apple-authentication';
 import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -151,6 +152,7 @@ export default function Welcome() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: BRAND }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <StatusBar style="light" />
       <CornerBubbles big={220} />
       <ScrollView
         keyboardShouldPersistTaps="handled"

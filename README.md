@@ -47,7 +47,7 @@ Edit `engine/src/catalog.ts`. Both apps pick up the change.
 | `src/app/checkout.tsx` | Review & pay, shown as an iOS sheet |
 | `src/store/store.ts` | The member's data, saved on the phone, using the engine's rules |
 | `src/lib/payments.ts` | Stand-in payment processor |
-| `src/theme.ts` | Colours (light by default, dark when the phone is dark) and Instrument Sans |
+| `src/theme.ts` | Colours (always light, like Clutch Up) and Instrument Sans |
 
 ### Release to TestFlight (EAS)
 
@@ -68,9 +68,17 @@ The build number goes up automatically. Apple processes the upload in 5–30 min
 | Signing | Shared team distribution certificate plus a Fore Wheels provisioning profile, both stored on Expo |
 | Uploads | Use the App Store Connect API key stored on Expo ("Clutch Up EAS Admin") |
 
+## Accounts (Supabase)
+
+Project `ugkdzuanjmbqenbzrelg` in the **Fore Wheels Detailing** organization (free plan; upgrade to Pro before launch so it never pauses). Database setup is in `supabase/migrations/`, the account-deletion service in `supabase/functions/delete-account/`.
+
+- Sign up with email + password (Clutch Up's password rules) and a unique username; sign in with email or username; Sign in with Apple; guests look around.
+- Email confirmation is **off** until Fore Wheels has its own email domain and sender (password-reset and email-change emails need it too).
+- Deleting an account doesn't yet disconnect Sign in with Apple (needs an Apple sign-in key as a function secret); the app explains how to do it in iPhone Settings.
+
 ## Before launch (not built yet)
 
-1. **Backend and accounts.** Supabase (as in Clutch Up): member sign-in, bookings and passes stored online.
+1. **Email domain and sender** for confirmation and password-reset emails.
 2. **Payments.** Stripe for cards and Apple Pay, plus the club's member billing. Detailing is a real-world service, so Apple doesn't allow it to be sold through in-app purchase (RevenueCat / StoreKit).
 3. **Staff screen.** For detailers to check cars in, update progress and mark them ready. Today progress is estimated from check-in time.
 4. **Notifications.** Push notifications (expo-notifications) when work starts and when the car is ready, and a Live Activity on the lock screen showing progress (expo-widgets, as Clutch Up does).

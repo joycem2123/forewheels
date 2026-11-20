@@ -52,8 +52,12 @@ export type Colors = typeof light;
 export const BRAND = '#6A4DF4';
 export const BRAND_INK = '#5638E0';
 
+/** The app is always light (see app.json "userInterfaceStyle"), like Clutch Up. The dark palette is kept for later. */
+export const ALWAYS_LIGHT = true;
+
 export function useColors(): Colors {
-  return useColorScheme() === 'dark' ? dark : light;
+  const scheme = useColorScheme();
+  return !ALWAYS_LIGHT && scheme === 'dark' ? dark : light;
 }
 
 export const fonts = {
