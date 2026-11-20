@@ -38,6 +38,16 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "owner": "joycem2123"
+    "owner": "joycem2123",
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "cdc2ece1-154d-42b0-b072-eaa34d5cc9ab"
+      }
+    }
   }
 }
