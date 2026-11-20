@@ -1,30 +1,36 @@
 # Fore Wheels Detailing
 
-Mobile web app for car detailing while members golf. Members book a detail for their tee time, pay, track progress live and manage their pass. It installs to the phone's home screen ("Add to Home Screen") and works like an app.
+Car detailing while members golf. Members book a detail for their tee time, pay, track progress live and manage their pass.
+
+Same setup as Clutch Up: one repository with a shared, tested `engine` and an Expo / React Native iPhone app.
+
+| Folder | What it is |
+|---|---|
+| `engine/` | **All prices and business rules**, as plain TypeScript with tests. Both apps use it. |
+| `app/` | **The iPhone app.** Expo SDK 58, Expo Router, React Native, TypeScript, Zustand (saved on the phone). Built and released with EAS. |
+| `web/` | The earlier mobile web app (Vite + React). Uses the same engine. |
 
 ## Run it
 
 ```bash
 npm install
-npm run dev       # local dev server
-npm test          # pricing and cancellation rules
-npm run build     # production build in dist/
+npm test          # engine tests: pricing, cancellations, booking flow
+npm run app       # start the iPhone app (Expo dev server)
+npm run web       # start the web app
 ```
 
-`npm run build:single` makes a one-file build in `dist-single/` for sharing a preview.
+With `npm run app`, scan the QR code with the iPhone camera to open the app in **Expo Go**. Everything in the app runs in Expo Go; no Mac or Xcode is needed.
 
-## What's where
+## Change prices or rules
 
-| Path | What it holds |
+Edit `engine/src/catalog.ts`. Both apps pick up the change.
+
+| File | What it holds |
 |---|---|
-| `src/data/catalog.ts` | **All prices and rules.** Services, add-ons, passes, GST, cancellation window, tee times. Change prices here. |
-| `src/lib/pricing.ts` | Quotes (pass credits, discounts, GST) and cancellation terms. Tested in `pricing.test.ts`. |
-| `src/api/client.ts` | Stand-in backend. Stores data in the browser and returns sample data on first launch. |
-| `src/api/payments.ts` | Stand-in payment processor. |
-| `src/state/store.tsx` | App state, navigation and live progress refresh. |
-| `src/screens/` | Home, Book, Checkout, Bookings, Passes, Me. |
-| `src/styles.css` | Colours, type and layout. Light by default with a dark theme. |
-| `public/` | Home-screen icon, manifest and offline support. |
+| `engine/src/catalog.ts` | Services, add-ons, passes, GST, cancellation window, tee times |
+| `engine/src/pricing.ts` | Quotes (pass credits, discounts, GST) and cancellation terms |
+| `engine/src/backend.ts` | Booking, cancelling and plan changes on the member's data, plus sample data |
+| `engine/src/time.ts` | Dates, tee-time labels and live progress |
 
 ## Business rules built in
 
@@ -33,11 +39,32 @@ npm run build     # production build in dist/
 - Season Pass $1,195 / $1,345: opening Pro Detail, 5 Signature, 20 Express, 15% off.
 - Free cancellation up to 2 hours before tee time. Later: a $20 fee, or the pass credit is used. No cancelling once work has started.
 
+## iPhone app (`app/`)
+
+| Path | What it holds |
+|---|---|
+| `src/app/(tabs)/` | Home, Bookings, Book, Passes, Me (the tab bar has a "+ Book" button in the middle) |
+| `src/app/checkout.tsx` | Review & pay, shown as an iOS sheet |
+| `src/store/store.ts` | The member's data, saved on the phone, using the engine's rules |
+| `src/lib/payments.ts` | Stand-in payment processor |
+| `src/theme.ts` | Colours (light by default, dark when the phone is dark) and Instrument Sans |
+
+### Release to TestFlight and the App Store (EAS)
+
+```bash
+cd app
+npx eas-cli@latest login
+npx eas-cli@latest init                                 # links the app to an Expo project
+npx eas-cli@latest build --platform ios --profile testflight
+npx eas-cli@latest submit --platform ios                # sends the build to App Store Connect
+```
+
+Bundle ID: `com.forewheelsdetailing.app`. Apple team: the same one as Clutch Up.
+
 ## Before launch (not built yet)
 
-1. **Real backend and accounts.** Replace `src/api/client.ts` with calls to a server and database (for example Supabase or Firebase), with member sign-in.
-2. **Real payments.** Replace `src/api/payments.ts` with Stripe (cards and Apple Pay) and the club's member billing for "charge to member account".
-3. **Staff view.** A screen for detailers to check cars in, update progress and mark them ready. Today progress is simulated from check-in time.
-4. **Text messages.** Notifications when work starts and when the car is ready (for example Twilio).
-5. **Real availability.** Today a few tee-time slots show as full at random. Replace with real capacity per detailer.
-6. **Hosting.** Deploy `dist/` to a host such as Vercel or Netlify on your own domain.
+1. **Backend and accounts.** Supabase (as in Clutch Up): member sign-in, bookings and passes stored online.
+2. **Payments.** Stripe for cards and Apple Pay, plus the club's member billing. Detailing is a real-world service, so Apple doesn't allow it to be sold through in-app purchase (RevenueCat / StoreKit).
+3. **Staff screen.** For detailers to check cars in, update progress and mark them ready. Today progress is estimated from check-in time.
+4. **Notifications.** Push notifications (expo-notifications) when work starts and when the car is ready, and a Live Activity on the lock screen showing progress (expo-widgets, as Clutch Up does).
+5. **Real availability.** Today a few tee-time slots show as full at random.

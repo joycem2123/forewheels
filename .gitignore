@@ -1,3 +1,13 @@
-node_modules
-dist
-dist-single
+node_modules/
+.expo/
+dist/
+dist-single/
+*.tsbuildinfo
+*.log
+.env*
+signing/
+app/credentials.json
+app/asc-api-key.p8
+app/ios/
+app/android/
+expo-env.d.ts
